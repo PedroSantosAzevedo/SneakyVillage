@@ -751,7 +751,8 @@ MonoBehaviour:
   rotateSpeed: 5
   dashSpeed: 10
   dashDuration: 0.22
-  jumpSpeed: 0
+  jumpSpeed: 30
+  isJumping: 0
   dashCooldown: 2
   dashButton: 330
   jumpButton: 331
