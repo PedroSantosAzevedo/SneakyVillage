@@ -8,13 +8,16 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     private CharacterController controller;
 
     // Movement speed and rotation speed
-    public float moveSpeed = 5f;
+    public float moveSpeed;
     public float rotateSpeed = 5f;
 
 
     // Dash speed and duration
     public float dashSpeed = 10f;
     public float dashDuration = 0.5f;
+
+    public float jumpSpeed;
+    public bool isJumping = false;
 
     // Dash cooldown
     public float dashCooldown = 2f;
@@ -27,9 +30,13 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     // Dash button
     public KeyCode dashButton = KeyCode.Space;
 
+    // Dash button
+    public KeyCode jumpButton = KeyCode.Space;
+
     // Gravity 
     public float gravity = 9.81f;
     public bool isGrounded;
+   
 
     // Start is called before the first frame update
     void Start()
@@ -42,15 +49,17 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        CheckForGroundRaycast();
         GetInputAxes();
 
     }
 
     private void FixedUpdate()
     {
-        //RotatePlayerTowardsDirectionOfMovement();
+        RotatePlayerTowardsDirectionOfMovement();
         MovePlayerBasedOnInputAxes();
         CheckIfDashButtonPressedAndDashTimerExpired();
+        CheckIfJumpButton();
         UpdateDashTimerAndCooldown();
     }
 
@@ -76,19 +85,30 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     // Move the player based on the input axes
     void MovePlayerBasedOnInputAxes()
     {
-        isGrounded = controller.isGrounded;
+
         Vector3 movement = Vector3.zero;
         if (!controller.isGrounded)
         {
             movement.y -= gravity * Time.deltaTime;
-            controller.Move(movement * Time.deltaTime);
-
         }
-
-
 
         Vector3 moveDirection = new Vector3(horizontalInput, movement.y, verticalInput).normalized;
         controller.Move(moveDirection * moveSpeed * Time.deltaTime);
+    }
+
+    void CheckForGround() 
+    {
+        isGrounded = controller.isGrounded;
+
+    }
+
+    void CheckForGroundRaycast()
+    {
+        int groundLayers = ~(1 << LayerMask.NameToLayer("NotGround"));
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, 2f, groundLayers);
+
+      
+
     }
 
     // Check if the dash button is pressed and the dash timer has expired
@@ -98,6 +118,16 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         {
             // Start the dash coroutine
             StartCoroutine(Dash());
+        }
+    }
+
+    void CheckIfJumpButton()
+    {
+        if (Input.GetKeyDown(jumpButton) && isGrounded)
+        {
+            // Start the dash coroutine
+            Debug.Log("jump");
+            StartCoroutine(Jump());
         }
     }
 
@@ -120,7 +150,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         // Set the dash timer and disable movement
         dashTimer = dashCooldown;
         float timer = dashDuration;
-        moveSpeed = dashSpeed;
+        //moveSpeed = dashSpeed;
 
         // Dash in the direction of movement
         Vector3 dashDirection = new Vector3(horizontalInput, 0f, verticalInput).normalized;
@@ -132,6 +162,23 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         }
 
         // Reset the movement speed
-        moveSpeed = 5f;
+        //moveSpeed = 5f;
     }
+
+    IEnumerator Jump()
+    {
+        // Set the dash timer and disable movement
+        dashTimer = dashCooldown;
+        float timer = dashDuration;
+
+        // Dash in the direction of movement
+        Vector3 dashDirection = new Vector3(horizontalInput, jumpSpeed, horizontalInput).normalized;
+        while (timer > 0f)
+        {
+            controller.Move(dashDirection * Time.deltaTime);
+            timer -= Time.deltaTime;
+            yield return null;
+        }
+    }
+
 }
