@@ -23,40 +23,10 @@ public class TrasnparentObject : MonoBehaviour
 
     private void Update()
     {
+
+
         // Calculate the distance between the two objects
         float distance = Vector3.Distance(object1.transform.position, object2.transform.position);
-
-        // Cast a ray between the two objects and get all the colliders that intersect with the ray
-        Ray ray = new Ray(object1.transform.position, object2.transform.position - object1.transform.position);
-        RaycastHit[] hits = Physics.RaycastAll(ray, distance);
-
-        // Loop through all the colliders that were hit by the raycast
-        foreach (RaycastHit hit in hits)
-        {
-            Renderer renderer = hit.collider.GetComponent<Renderer>();
-            TrasnparencyController trasnparency = hit.collider.gameObject.GetComponent<TrasnparencyController>();
-
-            if (trasnparency == null) {
-                Debug.Log("TransparancyController not found in: " + hit.collider.gameObject.name);
-            }
-
-
-            if (renderer != null)
-            {
-                Material material = renderer.material;
-
-                // Check if the material has a color property
-                if (material.HasProperty("_Color") && hit.collider.gameObject != object1 && hit.collider.gameObject != object2 && trasnparency != null)
-                {
-                    Debug.Log(hit.collider.gameObject.name);
-
-                    trasnparency.isBetween = true;
-                    
-                }
-            }
-        }
-
-
 
         // Check only the objects within a certain distance range of the two specified objects
         int numColliders = Physics.OverlapSphereNonAlloc(object2.transform.position, maxDistance, colliders);
@@ -105,7 +75,7 @@ public class TrasnparentObject : MonoBehaviour
                         //material.color = color;
                         trasnparency.isBetween = false;
 
-                        Debug.Log("bateu");
+                       // Debug.Log("bateu");
                     }
                 }
                 if (renderer.gameObject != object1 && renderer.gameObject != object2)
@@ -114,6 +84,40 @@ public class TrasnparentObject : MonoBehaviour
                 }
             }
         }
+
+
+         
+
+        // Cast a ray between the two objects and get all the colliders that intersect with the ray
+        Ray ray = new Ray(object1.transform.position, object2.transform.position - object1.transform.position);
+        RaycastHit[] hits = Physics.RaycastAll(ray, distance);
+
+        // Loop through all the colliders that were hit by the raycast
+        foreach (RaycastHit hit in hits)
+        {
+            Renderer renderer = hit.collider.GetComponent<Renderer>();
+            TrasnparencyController trasnparency = hit.collider.gameObject.GetComponent<TrasnparencyController>();
+
+            if (trasnparency == null) {
+                Debug.Log("TransparancyController not found in: " + hit.collider.gameObject.name);
+            }
+
+
+            if (renderer != null)
+            {
+                Material material = renderer.material;
+
+                // Check if the material has a color property
+                if (material.HasProperty("_Color") && hit.collider.gameObject != object1 && hit.collider.gameObject != object2 && trasnparency != null)
+                {
+                   // Debug.Log(hit.collider.gameObject.name);
+
+                    trasnparency.isBetween = true;
+                    
+                }
+            }
+        }
+
     }
 
     private void OnDrawGizmos()
