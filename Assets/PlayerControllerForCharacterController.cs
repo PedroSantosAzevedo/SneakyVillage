@@ -15,8 +15,9 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     // Dash speed and duration
     public float dashSpeed = 10f;
     public float dashDuration = 0.5f;
+    public float verticalVelocity;
 
-    public float jumpSpeed;
+    public float jumpHeight;
     public bool isJumping = false;
 
     // Dash cooldown
@@ -30,12 +31,15 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     // Dash button
     public KeyCode dashButton = KeyCode.Space;
 
-    // Dash button
+    // Jump button
     public KeyCode jumpButton = KeyCode.Space;
 
     // Gravity 
     public float gravity = 9.81f;
     public bool isGrounded;
+
+    private float jumpTimer;
+    public float jumpDuration;
    
 
     // Start is called before the first frame update
@@ -77,37 +81,71 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
         if (direction.magnitude > 0.5f)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+            //Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+            //transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
         }
     }
 
     // Move the player based on the input axes
+    /* void MovePlayerBasedOnInputAxes()
+     {
+
+         Vector3 movement = Vector3.zero;
+
+         if (isJumping)
+         {
+             movement.y = jumpSpeed * Time.deltaTime;
+             Debug.Log("Entrou no if do pulo");
+             isJumping = false;
+         }
+         else if (!controller.isGrounded)
+         {
+             movement.d -= gravity * Time.deltaTime;
+
+         }
+
+         Vector3 moveDirection = new Vector3(horizontalInput, movement.y, verticalInput).normalized;
+         controller.Move(moveDirection * moveSpeed * Time.deltaTime);
+     }*/
+
     void MovePlayerBasedOnInputAxes()
     {
 
-        Vector3 movement = Vector3.zero;
-        if (!controller.isGrounded)
-        {
-            movement.y -= gravity * Time.deltaTime;
-        }
+        Vector3 direction = new Vector3(horizontalInput, 0, verticalInput);
+        Vector3 velocity = direction * moveSpeed;
 
-        Vector3 moveDirection = new Vector3(horizontalInput, movement.y, verticalInput).normalized;
-        controller.Move(moveDirection * moveSpeed * Time.deltaTime);
+        if (isGrounded)
+        {
+
+            ///verticalVelocity = -1f;
+           /* if (Input.GetKeyDown(jumpButton))
+            {
+                verticalVelocity = jumpHeight;
+                Debug.Log("pulou");
+            }*/
+        }
+        else if (jumpTimer <= 0)
+        {
+            verticalVelocity = -gravity;
+            Debug.Log("no chao");
+        }
+        velocity.y = verticalVelocity;
+
+        velocity = transform.TransformDirection(velocity);
+
+
+        controller.Move(velocity * Time.deltaTime);
     }
 
     void CheckForGround() 
     {
         isGrounded = controller.isGrounded;
-
     }
 
     void CheckForGroundRaycast()
     {
         int groundLayers = ~(1 << LayerMask.NameToLayer("NotGround"));
         isGrounded = Physics.Raycast(transform.position, Vector3.down, 2f, groundLayers);
-
-      
 
     }
 
@@ -153,7 +191,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         //moveSpeed = dashSpeed;
 
         // Dash in the direction of movement
-        Vector3 dashDirection = new Vector3(horizontalInput, 0f, verticalInput).normalized;
+        Vector3 dashDirection = new Vector3(horizontalInput, 0, verticalInput).normalized;
         while (timer > 0f)
         {
             controller.Move(dashDirection * dashSpeed * Time.deltaTime);
@@ -168,17 +206,20 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     IEnumerator Jump()
     {
         // Set the dash timer and disable movement
-        dashTimer = dashCooldown;
-        float timer = dashDuration;
+        jumpTimer = dashCooldown;
+        //das = dashDuration;
 
         // Dash in the direction of movement
-        Vector3 dashDirection = new Vector3(horizontalInput, jumpSpeed, horizontalInput).normalized;
-        while (timer > 0f)
+        Vector3 dashDirection = new Vector3(horizontalInput, jumpHeight, horizontalInput).normalized;
+        while (jumpTimer > 0f)
         {
-            controller.Move(dashDirection * Time.deltaTime);
-            timer -= Time.deltaTime;
+            controller.Move(dashDirection * dashSpeed * Time.deltaTime);
+            isJumping = true;
+            jumpTimer -= Time.deltaTime;
             yield return null;
         }
-    }
 
+        
+        yield return null;
+    }
 }
