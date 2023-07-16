@@ -55,14 +55,14 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     {
         CheckForGroundRaycast();
         GetInputAxes();
-
+        CheckIfDashButtonPressedAndDashTimerExpired();
     }
 
     private void FixedUpdate()
     {
         RotatePlayerTowardsDirectionOfMovement();
         MovePlayerBasedOnInputAxes();
-        CheckIfDashButtonPressedAndDashTimerExpired();
+        
         CheckIfJumpButton();
         UpdateDashTimerAndCooldown();
     }
@@ -81,32 +81,10 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
         if (direction.magnitude > 0.5f)
         {
-            //Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-            //transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+            Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
         }
     }
-
-    // Move the player based on the input axes
-    /* void MovePlayerBasedOnInputAxes()
-     {
-
-         Vector3 movement = Vector3.zero;
-
-         if (isJumping)
-         {
-             movement.y = jumpSpeed * Time.deltaTime;
-             Debug.Log("Entrou no if do pulo");
-             isJumping = false;
-         }
-         else if (!controller.isGrounded)
-         {
-             movement.d -= gravity * Time.deltaTime;
-
-         }
-
-         Vector3 moveDirection = new Vector3(horizontalInput, movement.y, verticalInput).normalized;
-         controller.Move(moveDirection * moveSpeed * Time.deltaTime);
-     }*/
 
     void MovePlayerBasedOnInputAxes()
     {
@@ -118,11 +96,11 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         {
 
             ///verticalVelocity = -1f;
-           /* if (Input.GetKeyDown(jumpButton))
+            if (Input.GetKeyDown(jumpButton))
             {
                 verticalVelocity = jumpHeight;
                 Debug.Log("pulou");
-            }*/
+            }
         }
         else if (jumpTimer <= 0)
         {
@@ -130,9 +108,6 @@ public class PlayerControllerForCharacterController : MonoBehaviour
             Debug.Log("no chao");
         }
         velocity.y = verticalVelocity;
-
-        velocity = transform.TransformDirection(velocity);
-
 
         controller.Move(velocity * Time.deltaTime);
     }
