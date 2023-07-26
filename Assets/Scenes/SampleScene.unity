@@ -694,21 +694,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 7.1
   rotateSpeed: 5
-  dashSpeed: 10
-  dashDuration: 0.22
-  verticalVelocity: 0
-  dashCooldown: 2
-  dashButton: 330
-  jumpButton: 331
+  movement: {x: 0, y: 0, z: 0}
   gravity: 9.81
   isGrounded: 1
   isJumpPressed: 0
   maxJumpHeight: 1
   maxJumpTime: 0.5
   isJumping: 0
-  jumpDuration: 0
-  jumpHeight: 0
   initialJumpVelocity: 0
+  isDashPressed: 0
+  dashMultiplier: 0
+  dashDuration: 0
+  isDashing: 0
   isMoving: 0
 --- !u!114 &780187519
 MonoBehaviour:
@@ -1439,21 +1436,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 7.1
   rotateSpeed: 15
-  dashSpeed: 10
-  dashDuration: 0.22
-  verticalVelocity: 0
-  dashCooldown: 2
-  dashButton: 330
-  jumpButton: 331
-  gravity: 9.81
+  movement: {x: 0, y: -0.19, z: 0}
+  gravity: -7.0163603
   isGrounded: 1
   isJumpPressed: 0
-  maxJumpHeight: 1
-  maxJumpTime: 0.5
+  maxJumpHeight: 0.52
+  maxJumpTime: 0.77
   isJumping: 0
-  jumpDuration: 0
-  jumpHeight: 1
-  initialJumpVelocity: 0
+  initialJumpVelocity: 2.7012987
+  isDashPressed: 0
+  dashMultiplier: 3.53
+  dashDuration: 0.25
+  isDashing: 0
   isMoving: 0
 --- !u!143 &1650652638
 CharacterController:

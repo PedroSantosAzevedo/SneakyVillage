@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
+using System.IO;
 
 public class PlayerControllerForCharacterController : MonoBehaviour
 {
@@ -18,36 +19,33 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     private float verticalInput;
 
 
-    // Dash speed and duration
+  /*  // Dash speed and duration
     public float dashSpeed = 10f;
     public float dashDuration = 0.5f;
     public float verticalVelocity;
 
     // Dash cooldown
     public float dashCooldown = 2f;
-    private float dashTimer;
+    private float dashTimer;*/
 
-
-    // Dash button
-    public KeyCode dashButton = KeyCode.Space;
-
-    // Jump button
-    public KeyCode jumpButton = KeyCode.Space;
 
     // Gravity 
     public float gravity = 9.81f;
     public bool isGrounded;
 
+    //jump
     public bool isJumpPressed = false;
     public float maxJumpHeight = 1.0f;
     public float maxJumpTime = 0.5f;
     public bool isJumping = false;
     public float initialJumpVelocity;
 
-/*    private float jumpTimer;
-    public float jumpDuration;
-    public float jumpHeight;
-    public float initialJumpVelocity;*/
+    //dash
+    public bool isDashPressed = false;
+    public float dashMultiplier;
+    public float dashDuration;
+    public bool isDashing = false;
+
 
     //Player Input
 
@@ -64,8 +62,37 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         playerInput.CharacterControls.Move.performed += onMovementInput;
         playerInput.CharacterControls.Jump.started += onJump;
         playerInput.CharacterControls.Jump.canceled += onJump;
+        playerInput.CharacterControls.Dash.started += onDash;
+        playerInput.CharacterControls.Dash.canceled += onDash;
 
-        
+
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        // Get the Character Controller component
+        controller = GetComponent<CharacterController>();
+        isGrounded = controller.isGrounded;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        setJumpVariables();
+        CheckForGroundRaycast();
+       // CheckIfDashButtonPressedAndDashTimerExpired();
+        handlerAnimation();
+    }
+
+    private void FixedUpdate()
+    {
+        RotatePlayerTowardsDirectionOfMovement();
+        MovePlayerBasedOnInputAxes();
+       // UpdateDashTimerAndCooldown();
+        handleGravity();
+        handleJump();
+        handleDash();
     }
 
     void setJumpVariables() {
@@ -121,37 +148,31 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        // Get the Character Controller component
-        controller = GetComponent<CharacterController>();
-        isGrounded = controller.isGrounded;
+    void onDash(InputAction.CallbackContext context) {
+        isDashPressed = context.ReadValueAsButton();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        setJumpVariables();
-        CheckForGroundRaycast();
-        CheckIfDashButtonPressedAndDashTimerExpired();
-        handlerAnimation();
+    void handleDash() {
+        if (isDashPressed) {
+            StartCoroutine(setDash());
+            if (isDashing)
+            {
+                controller.Move(movement * moveSpeed * dashMultiplier * Time.deltaTime);
+            }
+        }
+ 
     }
 
-    private void FixedUpdate()
-    {
-        RotatePlayerTowardsDirectionOfMovement();
-       
-       
-        MovePlayerBasedOnInputAxes();
+    IEnumerator setDash() {
+        isDashing = true;
+        
 
-        UpdateDashTimerAndCooldown();
-       
-        handleGravity();
-        handleJump();
+        yield return new WaitForSeconds(dashDuration);
+
+        isDashing = false;
     }
 
-    // Get the input axes for movement and rotatio
+
 
     //Rotate the player towards the direction of movement
     void RotatePlayerTowardsDirectionOfMovement()
@@ -169,8 +190,10 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
     void MovePlayerBasedOnInputAxes()
     {
-    
-        controller.Move(movement * moveSpeed * Time.deltaTime);
+        if (!isDashing)
+        {
+            controller.Move(movement * moveSpeed * Time.deltaTime);
+        }
     }
 
 
@@ -185,10 +208,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         }
     }
 
-    void CheckForGround() 
-    {
-        isGrounded = controller.isGrounded;
-    }
+  
 
     void CheckForGroundRaycast()
     {
@@ -198,7 +218,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     }
 
     // Check if the dash button is pressed and the dash timer has expired
-    void CheckIfDashButtonPressedAndDashTimerExpired()
+   /* void CheckIfDashButtonPressedAndDashTimerExpired()
     {
         if (Input.GetKeyDown(dashButton) && dashTimer <= 0f)
         {
@@ -239,5 +259,5 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
         // Reset the movement speed
         //moveSpeed = 5f;
-    }
+    }*/
 }
