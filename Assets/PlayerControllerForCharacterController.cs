@@ -175,14 +175,13 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
 
     void handleGravity() {
-        if (isGrounded)
+        if (controller.isGrounded)
         {
-            movement.y += -9.5f * Time.deltaTime;
+            movement.y = -9.5f * Time.deltaTime;
         }
         else 
         {
             movement.y += gravity * Time.deltaTime;
-            Debug.Log("no chao");
         }
     }
 
