@@ -697,14 +697,19 @@ MonoBehaviour:
   dashSpeed: 10
   dashDuration: 0.22
   verticalVelocity: 0
-  jumpHeight: 0
-  isJumping: 0
   dashCooldown: 2
   dashButton: 330
   jumpButton: 331
   gravity: 9.81
   isGrounded: 1
+  isJumpPressed: 0
+  maxJumpHeight: 1
+  maxJumpTime: 0.5
+  isJumping: 0
   jumpDuration: 0
+  jumpHeight: 0
+  initialJumpVelocity: 0
+  isMoving: 0
 --- !u!114 &780187519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1433,18 +1438,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 7.1
-  rotateSpeed: 5
+  rotateSpeed: 15
   dashSpeed: 10
   dashDuration: 0.22
   verticalVelocity: 0
-  jumpHeight: 0
-  isJumping: 0
   dashCooldown: 2
   dashButton: 330
   jumpButton: 331
   gravity: 9.81
   isGrounded: 1
+  isJumpPressed: 0
+  maxJumpHeight: 1
+  maxJumpTime: 0.5
+  isJumping: 0
   jumpDuration: 0
+  jumpHeight: 1
+  initialJumpVelocity: 0
+  isMoving: 0
 --- !u!143 &1650652638
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1456,13 +1466,13 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 2
-  m_Radius: 0.51
+  m_Height: 1.71
+  m_Radius: 0.49
   m_SlopeLimit: 45
-  m_StepOffset: 1.97
+  m_StepOffset: 1.12
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: -0.22, z: 0}
+  m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!4 &1650652640 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: 82a2914d8f86c62488456950c8330e38,

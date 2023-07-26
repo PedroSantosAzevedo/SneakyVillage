@@ -1,15 +1,21 @@
 
 using UnityEngine;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public class PlayerControllerForCharacterController : MonoBehaviour
 {
-    // Character Controller component
+    // Components
     private CharacterController controller;
+    private Animator characterAnimator;
+    private PlayerInput playerInput;
 
     // Movement speed and rotation speed
     public float moveSpeed;
     public float rotateSpeed = 5f;
+    public Vector3 movement = Vector3.zero;
+    private float horizontalInput;
+    private float verticalInput;
 
 
     // Dash speed and duration
@@ -17,16 +23,10 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     public float dashDuration = 0.5f;
     public float verticalVelocity;
 
-    public float jumpHeight;
-    public bool isJumping = false;
-
     // Dash cooldown
     public float dashCooldown = 2f;
     private float dashTimer;
 
-    // Input axes for movement and rotation
-    private float horizontalInput;
-    private float verticalInput;
 
     // Dash button
     public KeyCode dashButton = KeyCode.Space;
@@ -38,9 +38,88 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     public float gravity = 9.81f;
     public bool isGrounded;
 
-    private float jumpTimer;
+    public bool isJumpPressed = false;
+    public float maxJumpHeight = 1.0f;
+    public float maxJumpTime = 0.5f;
+    public bool isJumping = false;
+    public float initialJumpVelocity;
+
+/*    private float jumpTimer;
     public float jumpDuration;
+    public float jumpHeight;
+    public float initialJumpVelocity;*/
+
+    //Player Input
+
+    public bool isMoving = false;
+
+
+    private void Awake()
+    {
+        playerInput = new PlayerInput();
+        characterAnimator = GetComponent<Animator>();
+
+        playerInput.CharacterControls.Move.started += onMovementInput;
+        playerInput.CharacterControls.Move.canceled += onMovementInput;
+        playerInput.CharacterControls.Move.performed += onMovementInput;
+        playerInput.CharacterControls.Jump.started += onJump;
+        playerInput.CharacterControls.Jump.canceled += onJump;
+
+        
+    }
+
+    void setJumpVariables() {
+        float timeToApex = maxJumpTime / 2;
+        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
+        initialJumpVelocity = (2 * maxJumpHeight / timeToApex);
+    }
+
+    private void OnEnable()
+    {
+        playerInput.CharacterControls.Enable();
+    }
+    private void OnDisable()
+    {
+        playerInput.CharacterControls.Disable();
+    }
+
+    void handlerAnimation() {
+        bool isWalking = characterAnimator.GetBool("isWalking");
+        bool isRunning = characterAnimator.GetBool("isRunning");
+
+        if (isMoving && !isWalking)
+        {
+            characterAnimator.SetBool("isWalking", true);
+        }
+        else if (!isMoving && isWalking) {
+            characterAnimator.SetBool("isWalking", false);
+        }
+    }
+
+    void onMovementInput(InputAction.CallbackContext context) {
    
+        movement.x = context.ReadValue<Vector2>().x;
+        movement.z = context.ReadValue<Vector2>().y;
+        isMoving = movement.x != 0 || movement.z != 0;
+    }
+
+    void onJump(InputAction.CallbackContext context) {
+        isJumpPressed = context.ReadValueAsButton();
+    }
+
+    void handleJump() {
+        if (isJumpPressed && controller.isGrounded && !isJumping)
+        {
+            isJumping = true;
+            movement.y = initialJumpVelocity;
+        }
+        else if (!isJumpPressed && controller.isGrounded && isJumping)
+        {
+            isJumping = false;
+        }
+
+
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -53,63 +132,58 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        setJumpVariables();
         CheckForGroundRaycast();
-        GetInputAxes();
         CheckIfDashButtonPressedAndDashTimerExpired();
+        handlerAnimation();
     }
 
     private void FixedUpdate()
     {
         RotatePlayerTowardsDirectionOfMovement();
+       
+       
         MovePlayerBasedOnInputAxes();
-        
-        CheckIfJumpButton();
+
         UpdateDashTimerAndCooldown();
+       
+        handleGravity();
+        handleJump();
     }
 
-    // Get the input axes for movement and rotation
-    void GetInputAxes()
-    {
-        horizontalInput = Input.GetAxis("Horizontal");
-        verticalInput = Input.GetAxis("Vertical");
-    }
+    // Get the input axes for movement and rotatio
 
     //Rotate the player towards the direction of movement
     void RotatePlayerTowardsDirectionOfMovement()
     {
-        Vector3 direction = new Vector3(horizontalInput, 0f, verticalInput);
+        Vector3 direction = new Vector3(movement.x, 0f, movement.z);
+      
 
         if (direction.magnitude > 0.5f)
         {
+
             Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
         }
     }
 
     void MovePlayerBasedOnInputAxes()
     {
+    
+        controller.Move(movement * moveSpeed * Time.deltaTime);
+    }
 
-        Vector3 direction = new Vector3(horizontalInput, 0, verticalInput);
-        Vector3 velocity = direction * moveSpeed;
 
+    void handleGravity() {
         if (isGrounded)
         {
-
-            ///verticalVelocity = -1f;
-            if (Input.GetKeyDown(jumpButton))
-            {
-                verticalVelocity = jumpHeight;
-                Debug.Log("pulou");
-            }
+            movement.y += -9.5f * Time.deltaTime;
         }
-        else if (jumpTimer <= 0)
+        else 
         {
-            verticalVelocity = -gravity;
+            movement.y += gravity * Time.deltaTime;
             Debug.Log("no chao");
         }
-        velocity.y = verticalVelocity;
-
-        controller.Move(velocity * Time.deltaTime);
     }
 
     void CheckForGround() 
@@ -131,16 +205,6 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         {
             // Start the dash coroutine
             StartCoroutine(Dash());
-        }
-    }
-
-    void CheckIfJumpButton()
-    {
-        if (Input.GetKeyDown(jumpButton) && isGrounded)
-        {
-            // Start the dash coroutine
-            Debug.Log("jump");
-            StartCoroutine(Jump());
         }
     }
 
@@ -176,25 +240,5 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
         // Reset the movement speed
         //moveSpeed = 5f;
-    }
-
-    IEnumerator Jump()
-    {
-        // Set the dash timer and disable movement
-        jumpTimer = dashCooldown;
-        //das = dashDuration;
-
-        // Dash in the direction of movement
-        Vector3 dashDirection = new Vector3(horizontalInput, jumpHeight, horizontalInput).normalized;
-        while (jumpTimer > 0f)
-        {
-            controller.Move(dashDirection * dashSpeed * Time.deltaTime);
-            isJumping = true;
-            jumpTimer -= Time.deltaTime;
-            yield return null;
-        }
-
-        
-        yield return null;
     }
 }
