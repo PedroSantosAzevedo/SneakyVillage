@@ -1437,13 +1437,13 @@ MonoBehaviour:
   moveSpeed: 7.1
   rotateSpeed: 15
   movement: {x: 0, y: -0.19, z: 0}
-  gravity: -7.0163603
+  gravity: -10.714285
   isGrounded: 1
   isJumpPressed: 0
-  maxJumpHeight: 0.52
-  maxJumpTime: 0.77
+  maxJumpHeight: 0.42
+  maxJumpTime: 0.56
   isJumping: 0
-  initialJumpVelocity: 2.7012987
+  initialJumpVelocity: 3
   isDashPressed: 0
   dashMultiplier: 3.53
   dashDuration: 0.25

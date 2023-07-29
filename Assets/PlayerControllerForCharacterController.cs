@@ -83,6 +83,10 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         CheckForGroundRaycast();
        // CheckIfDashButtonPressedAndDashTimerExpired();
         handlerAnimation();
+
+        handleGravity();
+        handleJump();
+        handleDash();
     }
 
     private void FixedUpdate()
@@ -90,9 +94,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         RotatePlayerTowardsDirectionOfMovement();
         MovePlayerBasedOnInputAxes();
        // UpdateDashTimerAndCooldown();
-        handleGravity();
-        handleJump();
-        handleDash();
+        
     }
 
     void setJumpVariables() {
@@ -113,13 +115,22 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     void handlerAnimation() {
         bool isWalking = characterAnimator.GetBool("isWalking");
         bool isRunning = characterAnimator.GetBool("isRunning");
+       
 
-        if (isMoving && !isWalking)
+        if (isMoving && !isWalking && !isDashing)
         {
             characterAnimator.SetBool("isWalking", true);
         }
-        else if (!isMoving && isWalking) {
+        else if (!isMoving && isWalking && !isDashing)
+        {
             characterAnimator.SetBool("isWalking", false);
+        }
+        else if (isDashing && isMoving || isDashing && isRunning) {
+            characterAnimator.SetBool("isRolling", true);
+        }
+        else if (!isDashing)
+        {
+            characterAnimator.SetBool("isRolling", false);
         }
     }
 
@@ -153,20 +164,23 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     }
 
     void handleDash() {
-        if (isDashPressed) {
-            StartCoroutine(setDash());
-            if (isDashing)
-            {
-                controller.Move(movement * moveSpeed * dashMultiplier * Time.deltaTime);
-            }
+
+        if (!isJumping && isDashing)
+        {
+            controller.Move(movement * dashMultiplier * Time.deltaTime);
         }
- 
+
+        if (isDashPressed && !isJumping && !isDashing) {
+            StartCoroutine(setDash());
+        }
+
+        
+
     }
 
     IEnumerator setDash() {
         isDashing = true;
         
-
         yield return new WaitForSeconds(dashDuration);
 
         isDashing = false;
