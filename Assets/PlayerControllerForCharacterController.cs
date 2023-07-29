@@ -15,8 +15,6 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     public float moveSpeed;
     public float rotateSpeed = 5f;
     public Vector3 movement = Vector3.zero;
-    private float horizontalInput;
-    private float verticalInput;
 
 
   /*  // Dash speed and duration
@@ -45,6 +43,9 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     public float dashMultiplier;
     public float dashDuration;
     public bool isDashing = false;
+    private float dashTimer;
+    public float dashCooldown;
+    public Vector3 dashDirection;
 
 
     //Player Input
@@ -125,7 +126,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         {
             characterAnimator.SetBool("isWalking", false);
         }
-        else if (isDashing && isMoving || isDashing && isRunning) {
+        else if (isDashing) {
             characterAnimator.SetBool("isRolling", true);
         }
         else if (!isDashing)
@@ -155,8 +156,6 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         {
             isJumping = false;
         }
-
-
     }
 
     void onDash(InputAction.CallbackContext context) {
@@ -167,36 +166,30 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
         if (!isJumping && isDashing)
         {
-            controller.Move(movement * dashMultiplier * Time.deltaTime);
+            controller.Move(dashDirection * dashMultiplier * Time.deltaTime);
         }
 
-        if (isDashPressed && !isJumping && !isDashing) {
+        if (isDashPressed && !isJumping && !isDashing && dashTimer <= 0) {
             StartCoroutine(setDash());
         }
-
-        
-
     }
 
     IEnumerator setDash() {
         isDashing = true;
-        
+        dashDirection = movement;
+        SetDashCooldown();
         yield return new WaitForSeconds(dashDuration);
-
         isDashing = false;
+        dashDirection = Vector3.zero;
     }
-
-
 
     //Rotate the player towards the direction of movement
     void RotatePlayerTowardsDirectionOfMovement()
     {
         Vector3 direction = new Vector3(movement.x, 0f, movement.z);
       
-
         if (direction.magnitude > 0.5f)
         {
-
             Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
         }
@@ -230,16 +223,16 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         isGrounded = Physics.Raycast(transform.position, Vector3.down, 2f, groundLayers);
 
     }
-
+/*
     // Check if the dash button is pressed and the dash timer has expired
-   /* void CheckIfDashButtonPressedAndDashTimerExpired()
+    void CheckIfDashButtonPressedAndDashTimerExpired()
     {
         if (Input.GetKeyDown(dashButton) && dashTimer <= 0f)
         {
             // Start the dash coroutine
             StartCoroutine(Dash());
         }
-    }
+    }*/
 
     // Update the dash timer and cooldown
     void UpdateDashTimerAndCooldown()
@@ -254,7 +247,11 @@ public class PlayerControllerForCharacterController : MonoBehaviour
         }
     }
 
-    // Coroutine for dashing
+    void SetDashCooldown() {
+        dashTimer = dashCooldown;
+    }
+
+   /* // Coroutine for dashing
     IEnumerator Dash()
     {
         // Set the dash timer and disable movement
