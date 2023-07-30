@@ -37,6 +37,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     public float maxJumpTime = 0.5f;
     public bool isJumping = false;
     public float initialJumpVelocity;
+    public float jumpRayCast;
 
     //dash
     public bool isDashPressed = false;
@@ -147,12 +148,12 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     }
 
     void handleJump() {
-        if (isJumpPressed && controller.isGrounded && !isJumping)
+        if (isJumpPressed && isGrounded && !isJumping)
         {
             isJumping = true;
             movement.y = initialJumpVelocity;
         }
-        else if (!isJumpPressed && controller.isGrounded && isJumping)
+        else if (!isJumpPressed && isGrounded && isJumping)
         {
             isJumping = false;
         }
@@ -205,7 +206,8 @@ public class PlayerControllerForCharacterController : MonoBehaviour
 
 
     void handleGravity() {
-        if (controller.isGrounded)
+
+        if (isGrounded && !isJumpPressed)
         {
             movement.y = -9.5f * Time.deltaTime;
         }
@@ -220,7 +222,7 @@ public class PlayerControllerForCharacterController : MonoBehaviour
     void CheckForGroundRaycast()
     {
         int groundLayers = ~(1 << LayerMask.NameToLayer("NotGround"));
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, 2f, groundLayers);
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, jumpRayCast, groundLayers);
 
     }
 /*

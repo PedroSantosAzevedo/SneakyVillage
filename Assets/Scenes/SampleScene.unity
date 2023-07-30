@@ -696,16 +696,19 @@ MonoBehaviour:
   rotateSpeed: 5
   movement: {x: 0, y: 0, z: 0}
   gravity: 9.81
-  isGrounded: 1
+  isGrounded: 0
   isJumpPressed: 0
   maxJumpHeight: 1
   maxJumpTime: 0.5
   isJumping: 0
   initialJumpVelocity: 0
+  jumpRayCast: 0
   isDashPressed: 0
   dashMultiplier: 0
   dashDuration: 0
   isDashing: 0
+  dashCooldown: 0
+  dashDirection: {x: 0, y: 0, z: 0}
   isMoving: 0
 --- !u!114 &780187519
 MonoBehaviour:
@@ -1438,16 +1441,19 @@ MonoBehaviour:
   rotateSpeed: 15
   movement: {x: 0, y: -0.19, z: 0}
   gravity: -10.714285
-  isGrounded: 1
+  isGrounded: 0
   isJumpPressed: 0
   maxJumpHeight: 0.42
   maxJumpTime: 0.56
   isJumping: 0
   initialJumpVelocity: 3
+  jumpRayCast: 0.2
   isDashPressed: 0
   dashMultiplier: 3.53
   dashDuration: 0.25
   isDashing: 0
+  dashCooldown: 0
+  dashDirection: {x: 0, y: 0, z: 0}
   isMoving: 0
 --- !u!143 &1650652638
 CharacterController:
