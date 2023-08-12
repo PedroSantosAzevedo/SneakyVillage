@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: NormalTransparencyData
   m_EditorClassIdentifier: Assembly-CSharp::TransparencyData
   isBetween: 0
-  normalTransparency: 0
-  tranparentValue: 0
+  normalTransparency: 1
+  tranparentValue: 0.5
